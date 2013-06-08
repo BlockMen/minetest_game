@@ -600,19 +600,13 @@ minetest.register_node("default:sign_wall", {
 	end,
 })
 
-default.chest_formspec = 
-	"size[8,9]"..
-	"list[current_name;main;0,0;8,4;]"..
-	"list[current_player;main;0,5;8,4;]"
-
-function default.get_locked_chest_formspec(pos)
+function default.get_chest_formspec(pos)
 	local formspec = 
 		"size[8,9]"..
 		"list[nodemeta:".. pos .. ";main;0,0;8,4;]"..
 		"list[current_player;main;0,5;8,4;]"
 	return formspec
 end
-
 
 minetest.register_node("default:chest", {
 	description = "Chest",
@@ -624,7 +618,6 @@ minetest.register_node("default:chest", {
 	sounds = default.node_sound_wood_defaults(),
 	on_construct = function(pos)
 		local meta = minetest.get_meta(pos)
-		meta:set_string("formspec",default.chest_formspec)
 		meta:set_string("infotext", "Chest")
 		local inv = meta:get_inventory()
 		inv:set_size("main", 8*4)
@@ -645,6 +638,10 @@ minetest.register_node("default:chest", {
     on_metadata_inventory_take = function(pos, listname, index, stack, player)
 		minetest.log("action", player:get_player_name()..
 				" takes stuff from chest at "..minetest.pos_to_string(pos))
+	end,
+	on_rightclick = function(pos, node, clicker)
+		local pos = pos.x .. "," .. pos.y .. "," ..pos.z
+		minetest.show_formspec(clicker:get_player_name(), "default:chest",default.get_chest_formspec(pos))
 	end,
 })
 
@@ -730,12 +727,12 @@ minetest.register_node("default:chest_locked", {
 		local meta = minetest.get_meta(pos)
 		if has_locked_chest_privilege(meta, clicker) then
 			local pos = pos.x .. "," .. pos.y .. "," ..pos.z
-			minetest.show_formspec(clicker:get_player_name(), "default:chest_locked",default.get_locked_chest_formspec(pos))
+			minetest.show_formspec(clicker:get_player_name(), "default:chest_locked",default.get_chest_formspec(pos))
 		end
 	end,
 })
 
-function default.get_furnace_active_formspec(percent)
+function default.get_furnace_active_formspec(percent, pos)
 	local formspec = 
 	"size[8,9]"..
 	"image[2,2;1,1;default_furnace_fire_bg.png^[lowpart:"..
@@ -959,7 +956,7 @@ minetest.register_abm({
 					meta:get_float("fuel_totaltime") * 100)
 			meta:set_string("infotext","Furnace active: "..percent.."%")
 			hacky_swap_node(pos,"default:furnace_active")
-			meta:set_string("formspec",default.get_furnace_active_formspec(percent))
+			meta:set_string("formspec",default.get_furnace_active_formspec(percent, pos))
 			return
 		end
 
