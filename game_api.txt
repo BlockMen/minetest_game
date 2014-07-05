@@ -1,6 +1,6 @@
 minetest_game API
 ======================
-GitHub Repo: https://github.com/BlockMen/minetest_next
+GitHub Repo: https://github.com/BlockMen/minetest_game
 
 Introduction
 ------------
